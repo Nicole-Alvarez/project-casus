@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111c24" />
+    <meta name="description" content="Mosslight — a little cooperative pixel-art adventure. Explore a moonlit grove together." />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23152129'/%3E%3Cpath d='M16 4l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' fill='%23b3edbe'/%3E%3C/svg%3E" />
+    <title>Mosslight — wander together</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="site-header">
+        <a class="brand" href="/" aria-label="Mosslight home"><span class="brand-mark">✦</span> mosslight<span class="brand-dot">.</span></a>
+        <span class="header-note">a little adventure, together</span>
+        <button class="quiet-button" id="credits-open">About & assets <span>↗</span></button>
+      </header>
+
+      <main>
+        <div class="chapter-heading"><div><span class="eyebrow">A COOPERATIVE PLATFORMER</span><h1>The Moonlit Grove<span> / 01</span></h1></div><span class="chapter-tag"><span class="status-dot"></span> UP TO 8 EXPLORERS</span></div>
+        <section class="game-stage" aria-label="Cooperative platformer">
+          <canvas id="game" tabindex="0" aria-label="Moonlit grove game. Arrow keys or A and D to move; space to jump."></canvas>
+          <div class="stage-vignette"></div>
+          <div class="game-hud" id="game-hud" hidden>
+            <div class="hud-pill"><span class="status-dot" id="network-dot"></span><span id="network-status">Connecting</span><span class="hud-divider"></span><span id="player-count">0/8 explorers</span></div>
+            <div class="hud-pill coin-pill"><img src="/game-assets/kenney-pixel-platformer/items/coin_0151.png" alt="" /><strong id="coin-count">0</strong><span id="coin-total">/ 34</span></div>
+          </div>
+
+          <form id="join-form" class="join-card">
+            <div class="card-topline"><span class="tiny-spark">✦</span><span>THE TRAIL IS CALLING</span></div>
+            <h2>A little adventure.<br /><em>Better together.</em></h2>
+            <p>Leap through the grove, gather golden coins, and find your way home. Bring a friend or wander on your own.</p>
+            <label for="player-name">YOUR EXPLORER NAME</label>
+            <input id="player-name" name="name" maxlength="18" value="Explorer" autocomplete="nickname" required />
+            <label for="room-code">EXPEDITION CODE <span>Share this to play together</span></label>
+            <div class="room-field"><input id="room-code" name="room" minlength="3" maxlength="12" pattern="[A-Za-z0-9]{3,12}" required /><button type="button" id="new-room" aria-label="Generate a new expedition code" title="New expedition code">↻</button></div>
+            <button class="primary-button" id="join-button" type="submit">Start exploring <span>→</span></button>
+            <p id="join-error" class="error-message" role="alert" hidden></p>
+            <div class="join-footnote"><span class="status-dot"></span> Free to play · No account needed</div>
+          </form>
+
+          <div class="preview-caption" id="preview-caption"><span>✦</span> A new path awaits.<small>THE MOONLIT GROVE</small></div>
+          <div class="stage-bottom" id="stage-bottom" hidden>
+            <div class="roster" id="roster" aria-label="Players in your expedition"></div>
+            <div class="room-actions"><button id="invite-button" class="hud-button">Invite a friend ↗</button><button id="leave-button" class="hud-button muted">Leave</button></div>
+          </div>
+          <div class="touch-controls" id="touch-controls" hidden><div><button data-control="left" aria-label="Move left">←</button><button data-control="right" aria-label="Move right">→</button></div><button data-control="jump" class="jump-touch" aria-label="Jump">↑</button></div>
+          <div id="completion" class="completion-card" hidden><span class="tiny-spark">✦</span><span class="eyebrow">YOU FOUND YOUR WAY</span><h2>Home, together.</h2><p>The grove is a little brighter because of you.</p><p id="completion-score"></p><button id="continue-button" class="primary-button">Keep wandering <span>→</span></button></div>
+          <div id="toast" class="toast" role="status" hidden></div>
+        </section>
+        <div class="under-stage"><div class="level-label"><span class="status-dot"></span><span>Moonlit Grove</span><span class="subtle">a shared little world</span></div><div class="progress-track" aria-label="Level progress"><span id="level-progress"></span></div><span class="progress-caption" id="progress-caption">THE ADVENTURE STARTS HERE</span></div>
+
+        <section class="trail-guide" aria-label="How to play">
+          <div class="guide-intro"><span class="eyebrow">A FEW TRAIL NOTES</span><h2>Find your footing.</h2><p>No rush. The journey is the good part.</p></div>
+          <div class="guide-item"><span class="guide-number">01</span><h3>A small step, a big leap</h3><p><kbd>A</kbd> <kbd>D</kbd> or <kbd>←</kbd> <kbd>→</kbd> to move<br /><kbd>SPACE</kbd> or <kbd>W</kbd> to jump</p></div>
+          <div class="guide-item"><span class="guide-number">02</span><h3>Leave a little light</h3><p>Gather coins as a team. Reach the flag to finish. Press <kbd>R</kbd> to return to your checkpoint.</p></div>
+          <div class="guide-item"><span class="guide-number">03</span><h3>Bring your people</h3><p>Share your expedition link. Friends join the same grove, with room for eight.</p></div>
+        </section>
+      </main>
+      <footer><span>Made for the joy of wandering.</span><span>Art & sound by <a href="https://kenney.nl" target="_blank" rel="noreferrer">Kenney</a> <span class="footer-star">✦</span> CC0 assets</span></footer>
+    </div>
+    <dialog id="credits-dialog"><button id="credits-close" class="dialog-close" aria-label="Close">×</button><span class="eyebrow">MADE WITH FREE ASSETS</span><h2>A shared little world.</h2><p>Mosslight is a cooperative browser platformer for up to eight explorers per room. Your server keeps everyone in the same world.</p><h3>Art & sound</h3><p><a href="https://kenney.nl/assets/pixel-platformer" target="_blank" rel="noreferrer">Kenney Pixel Platformer</a> supplies the pixel art. <a href="https://kenney.nl/assets/new-platformer-pack" target="_blank" rel="noreferrer">Kenney New Platformer Pack</a> supplies sound effects. Both are CC0.</p><p>Downloaded originals, categorized files, original licenses, and a source manifest are included in the project's assets folder.</p><h3>Controls</h3><p>A / D or ← / → to walk. Space / W / ↑ to jump. R to respawn. Touch controls appear on touch devices.</p></dialog>
+    <script type="module" src="/src/main.mjs"></script>
+  </body>
+</html>

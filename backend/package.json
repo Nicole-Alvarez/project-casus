@@ -1,0 +1,12 @@
+{
+  "name": "@casus/backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.mjs",
+    "start": "node src/index.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.22.0"
+  }
+}
