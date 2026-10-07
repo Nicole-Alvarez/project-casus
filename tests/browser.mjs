@@ -67,7 +67,8 @@ try{
   assert.equal(await page.locator('#game').getAttribute('data-animation'),'float');
   await page.waitForFunction(()=>Number(document.getElementById('game').dataset.frameIndex)>=2);
   assert.equal(await page.locator('#game').getAttribute('data-sprite-mode'),'whole','Every frame is a complete drawing');
-  assert.ok(Number(await page.locator('#game').getAttribute('data-sprite-magnification'))>1.2,'Guardian float keeps its apparent size');
+  assert.equal(Number(await page.locator('#game').getAttribute('data-sprite-magnification')),1,'Canopy does not change guardian body scale');
+  assert.ok(Math.abs(Number(await page.locator('#game').getAttribute('data-shell-size'))-20)<.001,'Float keeps the normal shell size');
   await page.waitForFunction(()=>Number(document.getElementById('game').dataset.blendLayers)>1);
   await page.screenshot({path:'test-results/exploration-balloon-float.png'});
   await page.keyboard.down('ArrowLeft');await page.keyboard.down('KeyQ');await until(()=>player.invulnerable,'dash i-frames');assert.ok(player.dashTime>0);
@@ -84,9 +85,21 @@ try{
   async function framed(p){await p.waitForFunction(()=>{const d=document.getElementById('game').dataset;return Math.abs(Number(d.visualCenterX)-Number(d.cameraX)-Number(d.viewWidth)/2)<2&&Math.abs(Number(d.visualCenterY)-Number(d.cameraY)-Number(d.viewHeight)*.6)<2;});}
   await framed(page);
   await page.waitForFunction(()=>document.getElementById('game').dataset.animation==='idle');
-  const firstFrame=await page.locator('#game').getAttribute('data-frame-index');
-  await page.waitForFunction(frame=>document.getElementById('game').dataset.frameIndex!==frame,firstFrame);
-  assert.equal(await page.locator('#game').getAttribute('data-animation-fps'),'3','Idle uses a slower clock');
+  await page.evaluate(()=>{
+    const canvas=document.getElementById('game'),d=canvas.dataset;
+    window.idleAudit={frames:new Set([d.frameIndex]),rates:new Set([d.animationFps]),min:Number(d.idleBreath),max:Number(d.idleBreath)};
+    window.idleObserver=new MutationObserver(()=>{
+      if(d.animation!=='idle')return;
+      const a=window.idleAudit,angle=Number(d.idleBreath);
+      a.frames.add(d.frameIndex);a.rates.add(d.animationFps);a.min=Math.min(a.min,angle);a.max=Math.max(a.max,angle);
+    });
+    window.idleObserver.observe(canvas,{attributes:true,attributeFilter:['data-frame-index','data-animation-fps','data-idle-breath']});
+  });
+  await page.waitForFunction(()=>window.idleAudit.max-window.idleAudit.min>.2);
+  const idleAudit=await page.evaluate(()=>{window.idleObserver.disconnect();const a=window.idleAudit;return {...a,frames:[...a.frames],rates:[...a.rates]};});
+  assert.deepEqual(idleAudit.frames,['0'],'Idle holds the same source pose while breathing');
+  assert.deepEqual(idleAudit.rates,['0'],'Idle never cycles inconsistent drawings');
+  assert.ok(idleAudit.min>=-1&&idleAudit.max<=1,'Idle breathing stays bounded');
   // Traverse the real canopy with keyboard controls, then render actual grapple/cling states.
   async function walkTo(x){const dir=player.x<x?'ArrowRight':'ArrowLeft';await page.keyboard.down(dir);await until(()=>Math.abs(player.x-x)<40||((dir==='ArrowRight')?player.x>x:player.x<x),'walk to '+x,12000);await page.keyboard.up(dir);await until(()=>Math.abs(player.vx)<1,'brake');}
   async function press(key){
@@ -171,6 +184,6 @@ try{
   await phone.setViewportSize({width:844,height:390});await layout(phone);await framed(phone);
   await phone.click('#settings-open');await phone.click('#leave-button');assert.ok(await phone.locator('#join-form').isVisible());
   assert.deepEqual(failures,[],'No browser errors or missing assets');
-  console.log('PASS: four selectable whole-character sprites, 3-fps idle/8-fps movement with smooth blends, live peer appearance/reconnect/storage, Q dash (X unbound), cape double jump/float, repeated wall dashes, wall traversal, aerial refresh, parallax, fullscreen/camera framing, multiplayer routes, menus and touch controls.');
+  console.log('PASS: four selectable whole-character sprites, stable idle/8-fps movement with smooth blends, live peer appearance/reconnect/storage, Q dash (X unbound), cape double jump/float, repeated wall dashes, wall traversal, aerial refresh, parallax, fullscreen/camera framing, multiplayer routes, menus and touch controls.');
   console.log('Screenshots: test-results/exploration-lobby.png, exploration-grapple.png, exploration-multiplayer.png, exploration-mobile.png');
 }finally{await browser?.close();await game.close();}

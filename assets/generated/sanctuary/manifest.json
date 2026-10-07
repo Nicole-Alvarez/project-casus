@@ -26,6 +26,13 @@
       "mode": "RGBA"
     },
     {
+      "path": "characters/ant/movement.png",
+      "sha256": "67e87e2d8558c146a223c9e15423b5d7cef44cdc04bec8ad16021caf8c093efc",
+      "width": 1568,
+      "height": 1003,
+      "mode": "RGBA"
+    },
+    {
       "path": "characters/ant/special.png",
       "sha256": "4d1de80e12026e168081fa7b6f0d61d6fbeb47edd3f21dbcc699e47d689e2dec",
       "width": 1254,
@@ -42,6 +49,13 @@
     {
       "path": "characters/beetle/ground.png",
       "sha256": "1ae197927490be929c11369a509be82f3895530939178fa3738296fc0f44a1dd",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/beetle/movement.png",
+      "sha256": "8778ca2530b6506e37d754157f5638a0e023397670387c839ef12e4c40f4d3a6",
       "width": 1536,
       "height": 1024,
       "mode": "RGBA"
@@ -68,6 +82,13 @@
       "mode": "RGBA"
     },
     {
+      "path": "characters/moth/movement.png",
+      "sha256": "21fba73154e1c9aa998a489b9269d363d2b42eb2663dfbb5e99538ddd3877600",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA"
+    },
+    {
       "path": "characters/moth/special.png",
       "sha256": "4e74d3d70fb67702927b4ca1ec0f58e1f6a1a352f99977e64e8c9124fd83dbd2",
       "width": 1254,
@@ -84,6 +105,13 @@
     {
       "path": "characters/pillbug/ground.png",
       "sha256": "93e0cce792c82b0016b307f15ddad0607b3871a4ffb755e0cc4aad564ffbf05a",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/pillbug/movement.png",
+      "sha256": "fc2a988537ade114aac64755634b3fc171d33051abdc6c497a8090fcb61a7933",
       "width": 1536,
       "height": 1024,
       "mode": "RGBA"

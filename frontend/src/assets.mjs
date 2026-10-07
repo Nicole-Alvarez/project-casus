@@ -1,15 +1,18 @@
 import {CHARACTERS,DEFAULT_CHARACTER,isCharacter} from '../../shared/characters.mjs';
 import {SPRITE_FRAMES} from './sprite-frames.mjs';
+import {getIdleMotion,prepareIdleMotion} from './idle-motion.mjs';
+export {getIdleMotion} from './idle-motion.mjs';
 const ROOT='/game-assets/';
 const ART=ROOT+'generated/sanctuary/';
 export const CHARACTER={bodyHeight:52};
 export const CAMERA_ZOOM=1.4;
 export const ANIMATION_FPS=8;
-export const IDLE_FPS=3;
+// Idle holds one drawing with local cape motion and breathing.
+export const IDLE_FPS=0;
 export const ANIMATIONS=SPRITE_FRAMES;
 export const RUNTIME_ART={
   cavern:ART+'backgrounds/cavern.png',
-  ...Object.fromEntries(CHARACTERS.flatMap(({id})=>['ground','air','special'].map(group=>[id+'-'+group,ART+'characters/'+id+'/'+group+'.png']))),
+  ...Object.fromEntries(CHARACTERS.flatMap(({id})=>['ground','air','special','movement'].map(group=>[id+'-'+group,ART+'characters/'+id+'/'+group+'.png']))),
 };
 export const PARALLAX=[{id:'cavern',x:.10,y:.045},{id:'arches',x:.28,y:.12},{id:'roots',x:.52,y:.20}];
 export function getAnimationState(p){
@@ -23,51 +26,66 @@ export function getAnimationState(p){
 export function getAnimationFrame(sprite,state,elapsed){
   const skin=isCharacter(sprite)?sprite:DEFAULT_CHARACTER;
   const clip=SPRITE_FRAMES[skin][state]??SPRITE_FRAMES[skin].idle;
-  const fps=clip===SPRITE_FRAMES[skin].idle?IDLE_FPS:ANIMATION_FPS;
+  if(clip===SPRITE_FRAMES[skin].idle)return {frame:clip.frames[0],index:0,fps:IDLE_FPS,nextFrame:clip.frames[0],mix:0};
+  const fps=ANIMATION_FPS;
   const clock=Math.max(0,elapsed)*fps,position=Math.floor(clock);
-  const index=clip.loop?position%clip.frames.length:Math.min(position,clip.frames.length-1);
-  const next=clip.loop?(index+1)%clip.frames.length:Math.min(index+1,clip.frames.length-1);
-  // Hold the drawing, then ease into the next complete pose over 70 ms.
-  const mix=next===index?0:ease((clock-position-1+.07*fps)/(.07*fps));
+  const sequence=clip.sequence;
+  const at=n=>sequence ? sequence[n<sequence.length?n:(clip.loopFrom??0)+(n-sequence.length)%(sequence.length-(clip.loopFrom??0))]
+    :clip.loop?n%clip.frames.length:Math.min(n,clip.frames.length-1);
+  const index=at(position),next=at(position+1);
+  // Movement eases continuously between complete drawings.
+  const fraction=clock-position;
+  const mix=next===index?0:ease(fraction);
   return {frame:clip.frames[index],index,fps,nextFrame:clip.frames[next],mix};
 }
 const ease=t=>{const x=Math.max(0,Math.min(1,t));return x*x*(3-2*x);};
-const meanHeight=clip=>clip.frames.reduce((sum,f)=>sum+f.sh*f.scale,0)/clip.frames.length;
-const magnifications=Object.fromEntries(Object.entries(SPRITE_FRAMES).map(([skin,clips])=>{
-  const reference=meanHeight(clips.idle);
-  return [skin,{float:Math.max(1,Math.min(1.35,reference/meanHeight(clips.float))),
-    dash:Math.max(1,Math.min(1.35,reference*.9/meanHeight(clips.dash)))}];
-}));
-export function getDisplayMagnification(sprite,state){
-  return magnifications[isCharacter(sprite)?sprite:DEFAULT_CHARACTER][state]??1;
+// Cape bounds are independent of body scale. All frames already normalize the
+// shell to 20 world units; use the approved idle body's vertical anchor always.
+const bodyAnchors=Object.fromEntries(Object.entries(SPRITE_FRAMES).map(([skin,clips])=>
+  [skin,(clips.idle.frames[0].pivotY-clips.idle.frames[0].shellCenterY)*clips.idle.frames[0].scale]));
+// Equal shell span did not equal body stature: the ant's approved idle body
+// measured 36.6 units versus ~42 for beetle/guardian. Keep its correction fixed
+// across every action so larger capes cannot change the explorer's size.
+export function getDisplayMagnification(sprite){return sprite==='ant'?1.16:1;}
+export function getCharacterFacing(p,state){
+  return state==='cling'&&p.wallSide?-p.wallSide:(p.facing<0?-1:1);
 }
 function mergeLayers(layers){
-  const weights=new Map();
-  for(const {frame,weight} of layers)if(weight>0)weights.set(frame,(weights.get(frame)??0)+weight);
-  const total=[...weights.values()].reduce((sum,w)=>sum+w,0);
-  return [...weights].map(([frame,weight])=>({frame,weight:weight/total}));
+  const merged=[];
+  for(const layer of layers){
+    if(layer.weight<=0)continue;
+    const existing=merged.find(l=>l.frame===layer.frame&&l.facing===layer.facing&&l.idleTime===layer.idleTime);
+    if(existing)existing.weight+=layer.weight;else merged.push({...layer});
+  }
+  const total=merged.reduce((sum,l)=>sum+l.weight,0);
+  return merged.map(l=>({...l,weight:l.weight/total}));
 }
-// Each sample contains complete drawings. Source images and body parts never change.
+// Blend complete drawings with a stable body anchor. Each outgoing layer keeps
+// its orientation, including looking away from a wall during a wall jump.
 export class CharacterAnimation {
-  sample(sprite,state,time){
+  sample(sprite,state,time,player={facing:1,wallSide:1}){
     if(this.sprite!==sprite){this.sprite=sprite;this.state=state;this.since=time;this.from=null;}
     else if(this.state!==state){this.from=this.last;this.state=state;this.since=time;}
     const frame=getAnimationFrame(sprite,state,time-this.since);
-    const layers=mergeLayers([{frame:frame.frame,weight:1-frame.mix},{frame:frame.nextFrame,weight:frame.mix}]);
-    let magnification=getDisplayMagnification(sprite,state),mixed=layers;
+    const facing=getCharacterFacing(player,state)*(state==='cling'?-1:1);
+    const idleTime=state==='idle'?Math.max(0,time-this.since):undefined;
+    const layers=mergeLayers([{frame:frame.frame,weight:1-frame.mix,facing,idleTime},{frame:frame.nextFrame,weight:frame.mix,facing,idleTime}]);
+    let mixed=layers;
     if(this.from){
       const amount=ease((time-this.since)/.12);
-      magnification=this.from.magnification+(magnification-this.from.magnification)*amount;
       mixed=mergeLayers([...this.from.layers.map(l=>({...l,weight:l.weight*(1-amount)})),...layers.map(l=>({...l,weight:l.weight*amount}))]);
       if(amount===1)this.from=null;
     }
-    const headHeight=mixed.reduce((sum,l)=>sum+(l.frame.pivotY-l.frame.shellCenterY)*l.frame.scale*l.weight,0)*magnification;
-    return this.last={state,...frame,layers:mixed,magnification,headHeight};
+    const magnification=getDisplayMagnification(sprite);
+    const headHeight=bodyAnchors[isCharacter(sprite)?sprite:DEFAULT_CHARACTER]*magnification;
+    const headX=mixed.reduce((sum,l)=>sum+(Number.isFinite(l.frame.wallAttachX)
+      ?l.facing*((player.w??26)/2-(l.frame.wallAttachX-l.frame.pivotX)*l.frame.scale*magnification):0)*l.weight,0);
+    return this.last={state,...frame,layers:mixed,magnification,headHeight,headX,idleBreath:mixed.reduce((sum,l)=>sum+(l.idleTime===undefined?0:getIdleMotion(l.idleTime).breath)*l.weight,0)};
   }
 }
 // Prepare a complete pose once. Connected-alpha extraction excludes neighboring
 // swords/capes in overlapping atlas rectangles, retaining antialiased edges.
-// It never assembles, bends or independently animates body parts.
+// It retains a single complete pose for subsequent whole-texture animation.
 function extractPose(image,f){
   const canvas=document.createElement('canvas');canvas.width=f.sw;canvas.height=f.sh;
   const ctx=canvas.getContext('2d',{willReadFrequently:true});
@@ -102,6 +120,9 @@ export async function loadSprites(){
   sprites.frames=new Map();
   for(const clips of Object.values(SPRITE_FRAMES))for(const clip of Object.values(clips))for(const frame of clip.frames)
     sprites.frames.set(frame,extractPose(sprites[frame.sheet],frame));
+  sprites.idleMotion=new Map(Object.values(SPRITE_FRAMES).map(clips=>{
+    const f=clips.idle.frames[0];return [f,prepareIdleMotion(sprites.frames.get(f),f)];
+  }));
   return sprites;
 }
 export class Sounds {

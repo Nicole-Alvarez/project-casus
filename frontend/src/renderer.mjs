@@ -1,6 +1,6 @@
 import {LEVEL} from '../../shared/level.mjs';
 import {cameraTarget,selectGrappleAnchor} from '../../shared/physics.mjs';
-import {CHARACTER,CAMERA_ZOOM,PARALLAX,CharacterAnimation,getAnimationState} from './assets.mjs';
+import {CHARACTER,CAMERA_ZOOM,PARALLAX,CharacterAnimation,getAnimationState,getIdleMotion} from './assets.mjs';
 const hash=n=>((Math.sin(n*127.1+311.7)*43758.5453)%1+1)%1;
 export class Renderer {
   cameraX=0;cameraY=0;width=640;height=400/CAMERA_ZOOM;initialized=false;animations=new Map();
@@ -81,17 +81,26 @@ export class Renderer {
   pose(p,time){
     let track=this.animations.get(p.id);
     if(!track){track=new CharacterAnimation();this.animations.set(p.id,track);}
-    return track.sample(p.sprite,getAnimationState(p),time);
+    return track.sample(p.sprite,getAnimationState(p),time,p);
   }
   character(p,x,y,pose,alpha=1){
     const ctx=this.ctx;ctx.save();ctx.globalAlpha=alpha;
-    ctx.translate(x+p.w/2,y+p.h);ctx.scale(p.facing<0?-1:1,1);
-    const boxes=pose.layers.map(({frame:f,weight})=>{
-      const scale=f.scale*pose.magnification;
-      return {image:this.sprites.frames.get(f),weight,x:-f.pivotX*scale,
-        y:-f.shellCenterY*scale-pose.headHeight,w:f.sw*scale,h:f.sh*scale};
+    ctx.translate(x+p.w/2,y+p.h);
+    const boxes=pose.layers.flatMap(({frame:f,weight,facing=1,idleTime})=>{
+      const model=idleTime===undefined?null:this.sprites.idleMotion.get(f);
+      const motion=model?getIdleMotion(idleTime):null;
+      const images=model?[{image:model.frame(motion.index),weight:1-motion.mix},{image:model.frame(motion.nextIndex),weight:motion.mix}]
+        :[{image:this.sprites.frames.get(f),weight:1}];
+      const padding=model?.padding??0,scale=f.scale*pose.magnification,origin=pose.headX??0;
+      const sourceX=-(f.pivotX+padding)*scale,w=(f.sw+padding*2)*scale;
+      return images.filter(l=>l.weight>0).map(l=>({image:l.image,weight:weight*l.weight,origin,facing,sourceX,
+        x:origin+(facing<0?-sourceX-w:sourceX),y:-(f.shellCenterY+padding)*scale-pose.headHeight,w,h:(f.sh+padding*2)*scale}));
     });
-    if(boxes.length===1){const b=boxes[0];ctx.drawImage(b.image,b.x,b.y,b.w,b.h);}
+    const draw=(target,b)=>{target.save();target.translate(b.origin,0);target.scale(b.facing,1);
+      target.drawImage(b.image,b.sourceX,b.y,b.w,b.h);target.restore();};
+    // Keep idle on one compositing path even at exact cached phases, avoiding
+    // a direct-draw/resampled-draw sharpness pulse every tenth of a second.
+    if(boxes.length===1&&pose.layers.every(l=>l.idleTime===undefined)){const b=boxes[0];draw(ctx,b);}
     else {
       const left=Math.floor(Math.min(...boxes.map(b=>b.x)))-1,top=Math.floor(Math.min(...boxes.map(b=>b.y)))-1;
       const right=Math.ceil(Math.max(...boxes.map(b=>b.x+b.w)))+1,bottom=Math.ceil(Math.max(...boxes.map(b=>b.y+b.h)))+1;
@@ -102,7 +111,7 @@ export class Renderer {
       // Premultiplied additive blending keeps overlapping opaque pixels opaque.
       // Composite the complete mix onto the world once, preventing dark ghosts.
       blend.globalCompositeOperation='lighter';blend.imageSmoothingEnabled=true;blend.imageSmoothingQuality='high';
-      for(const b of boxes){blend.globalAlpha=b.weight;blend.drawImage(b.image,b.x,b.y,b.w,b.h);}
+      for(const b of boxes){blend.globalAlpha=b.weight;draw(blend,b);}
       ctx.drawImage(canvas,left,top,canvas.width/ratio,canvas.height/ratio);
     }
     ctx.restore();
@@ -127,7 +136,7 @@ export class Renderer {
     const poses=new Map(state.players.map(q=>[q.id,this.pose(q,time)])),local=poses.get(p.id);
     for(const id of this.animations.keys())if(!poses.has(id))this.animations.delete(id);
     ctx.setTransform(this.canvas.width/w,0,0,this.canvas.height/h,0,0);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-    Object.assign(this.canvas.dataset,{mapName:LEVEL.name,spriteHeight:CHARACTER.bodyHeight,animation:local.state,frameIndex:local.index,spriteMode:'whole',sprite:p.sprite,animationFps:local.fps,blendLayers:local.layers.length,spriteMagnification:local.magnification.toFixed(3),shellSize:(local.frame.shellSpan*local.frame.scale*local.magnification).toFixed(2),remoteSprites:JSON.stringify(state.players.filter(q=>q.id!==p.id).map(q=>({id:q.id,sprite:q.sprite}))),cameraX:this.cameraX.toFixed(2),cameraY:this.cameraY.toFixed(2),playerX:p.x.toFixed(2),playerY:p.y.toFixed(2),visualCenterX:cx.toFixed(2),visualCenterY:cy.toFixed(2),viewWidth:w.toFixed(2),viewHeight:String(h),dash:String(p.invulnerable),float:String(p.floatActive),cling:String(p.wallSide),grapple:p.grappleId??'',parallaxX:JSON.stringify(PARALLAX.map(layer=>this.cameraX*layer.x)),remoteAnimations:JSON.stringify(state.players.filter(q=>q.id!==p.id).map(q=>({id:q.id,state:poses.get(q.id).state,frame:poses.get(q.id).index}))),remoteAbilities:JSON.stringify(state.players.filter(q=>q.id!==p.id).map(q=>({id:q.id,dash:q.invulnerable,float:q.floatActive,cling:q.wallSide,grapple:q.grappleId})))});
+    Object.assign(this.canvas.dataset,{mapName:LEVEL.name,spriteHeight:CHARACTER.bodyHeight,animation:local.state,frameIndex:local.index,spriteMode:'whole',sprite:p.sprite,animationFps:local.fps,idleBreath:local.idleBreath.toFixed(6),blendLayers:local.layers.length,spriteMagnification:local.magnification.toFixed(3),shellSize:(local.frame.shellSpan*local.frame.scale*local.magnification).toFixed(2),remoteSprites:JSON.stringify(state.players.filter(q=>q.id!==p.id).map(q=>({id:q.id,sprite:q.sprite}))),cameraX:this.cameraX.toFixed(2),cameraY:this.cameraY.toFixed(2),playerX:p.x.toFixed(2),playerY:p.y.toFixed(2),visualCenterX:cx.toFixed(2),visualCenterY:cy.toFixed(2),viewWidth:w.toFixed(2),viewHeight:String(h),dash:String(p.invulnerable),float:String(p.floatActive),cling:String(p.wallSide),grapple:p.grappleId??'',parallaxX:JSON.stringify(PARALLAX.map(layer=>this.cameraX*layer.x)),remoteAnimations:JSON.stringify(state.players.filter(q=>q.id!==p.id).map(q=>({id:q.id,state:poses.get(q.id).state,frame:poses.get(q.id).index}))),remoteAbilities:JSON.stringify(state.players.filter(q=>q.id!==p.id).map(q=>({id:q.id,dash:q.invulnerable,float:q.floatActive,cling:q.wallSide,grapple:q.grappleId})))});
     this.backdrop(time);ctx.save();ctx.translate(-this.cameraX,-this.cameraY);
     this.scenery();
     for(const platform of LEVEL.platforms)if(platform.x+platform.w>=this.cameraX&&platform.x<=this.cameraX+w&&platform.y+platform.h>=this.cameraY&&platform.y<=this.cameraY+h)this.terrain(platform);

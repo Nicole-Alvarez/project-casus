@@ -1,6 +1,78 @@
 # Game verification — 2026-10-07
 
-## Current: dash duration shortened by 50%
+## Current: Thorn Ant body-size correction
+
+Shell normalization alone left the approved ant body shorter than the other compact explorers: **36.59** world units from helmet top to feet, versus beetle **41.88** and guardian **42.43**. Thorn Ant now uses a fixed **1.16** display magnification across all ten actions, giving a body height of **42.44**. Its stable foot-to-head anchor and wall-hand offsets use the same scale. Other character sizes, source PNGs and movement physics are unchanged.
+
+Confirmed under bundled Node **24.19.0**:
+
+- The new regression failed on the original 36.59-unit height before implementation.
+- `npm test`: **49 passed, 0 failed**, including constant ant size/anchor across actions and enlarged hand contact on both walls.
+- `npm run build`: **passed**.
+- `npm run test:sprites`: **passed**, including 88 idle renders, 12 real-image deformation comparisons, 20 opaque faces and 16 source wall contacts. The updated all-character/action contact sheet was visually reviewed.
+- All **18 source PNGs** match pre-task SHA-256 hashes. Existing staged work is preserved; no commits.
+
+Reproduce using `npm test`, `npm run build` and `npm run test:sprites`. Updated visual comparison: `test-results/action-sprite-audit.png`.
+
+---
+
+## Historical: cape sway and breathing on the stable idle drawing
+
+The prior fix held one whole drawing and rotated it as a unit, so the cape no longer moved independently. All four explorers now retain that drawing and apply bounded local deformation to the complete runtime texture: a slow **3.2-second** cape wave and gentle chest expansion/rise. Helmet, bone sword, palms and feet are protected. No body-part rig or new artwork is introduced. Thirty-two phases are cached lazily per character, shared by players using that appearance, and interpolated continuously. Padding prevents moving tips from clipping. Idle always follows the same compositing path, including exact phase boundaries, to avoid switching between direct and resampled drawing. Movement remains **8 fps**; existing 120-ms action transitions retain the displayed idle deformation, including interrupted changes.
+
+Confirmed under bundled Node **24.19.0**:
+
+- `npm test`: **48 passed, 0 failed**. The targeted 11 animation tests also passed after the final loop-boundary adjustment, including near-cycle rounding and interrupted transitions.
+- `npm run build`: **passed** after the final renderer adjustment.
+- `npm run test:sprites`: **passed** with actual source PNGs and the production renderer: 12 pixel comparisons at three phases across four characters show moving cape/chest regions and identical opaque protected pixels; 88 idle renders across both facings retain body scale, foot transform and drawing dimensions. The existing 20 opaque-face and 16 wall-contact checks pass. The full-cycle contact sheet was visually reviewed to refine pale cape highlights without locking them as bone.
+- `npm run test:browser`: **passed**, covering live multiplayer appearance/reconnect, traversal, Q dash, repeated wall dashes, float, camera framing, fullscreen, menus and touch controls.
+- All **18 source PNGs** match the pre-task SHA-256 baseline. Existing staged changes were preserved. No physics, map, camera, dependencies or Git history changed in this update.
+
+Reproduce with `npm test`, `npm run build`, `npm run test:sprites` and `npm run test:browser`. Ignored outputs: `test-results/idle-motion-audit.png` shows four phases for every explorer; `test-results/action-animation-preview.webm` records 9.2 seconds, beginning with a full idle cycle and continuing through movement/action transitions. This is deliberately subtle texture deformation, not a new set of independently drawn idle frames. No subagents or commits.
+
+---
+
+## Historical: idle sword and leg geometry fix
+
+Root cause: idle cycled independently generated drawings whose sword lengths, leg poses and per-frame measurement scales differed. Whole-image crossfading did not make their geometry consistent. The regression test reproduced the frame swap before the fix; a second test failed because no stable-pose sway existed.
+
+All four explorers now hold the first approved complete idle drawing. The renderer applies only a rigid rotation around the foot pivot: at most **0.006 radians (~0.34 degrees)**, with a **3.2-second cycle**. There is no idle frame cycling, scaling, shear, body-part assembly or deformation. The first drawing also supplies the exact foot-to-head anchor, planting its measured feet at the rotation pivot. Source sword and leg geometry therefore stays fixed; the feet follow only the tiny natural weight shift of the complete pose. Idle reports 0 fps for drawing advancement while sway updates each render. Movement remains 8 fps. The existing 120-ms action blend also eases the sway to/from zero and preserves it if an action transition is interrupted.
+
+Confirmed under bundled Node **24.19.0**:
+
+- `npm test`: **47 passed, 0 failed**. New checks cover a fixed source pose across former frame boundaries, slow sway, unchanged scale/anchor, and interrupted action transitions.
+- `node --test tests/assets.test.mjs`: **2 passed**, after updating asset documentation/inventory hashes.
+- `npm run build`: **passed**.
+- `npm run test:sprites`: **passed**. Instrumented real Canvas `drawImage` calls verify **88 idle renders** across four characters, both facings, former idle frame boundaries and two full sway cycles. Every draw uses the same source Canvas and dimensions, orthogonal 3× axes, and the same foot pivot. Existing 20 opaque-face and 16 wall-attachment checks also pass.
+- `npm run test:browser`: **passed on a standalone rerun**, including changing idle sway with fixed frame 0, held drawing rate, real multiplayer movement, wall traversal, float, dash and touch/menu checks; no page errors or missing assets. The initial run stopped at the legacy assertion that waited for idle frame cycling, which was updated to match the approved design. A subsequent concurrent run timed out waiting for a peer dash rendering observation; its exact cause was not established. The standalone rerun passed without further product changes.
+- All **18 existing PNGs** match the pre-task SHA-256 baseline. No source artwork, physics, camera, map, dependencies or Git history were changed.
+
+Reproduce with `npm test`, `npm run build`, `npm run test:sprites` and `npm run test:browser`. The ignored `test-results/action-animation-preview.webm` now records 9.2 seconds, beginning with one complete idle cycle before demonstrating action transitions. No subagents or commits.
+
+---
+
+## Historical: stable body scale and revised airborne/wall poses
+
+Implemented the approved bounded update inline for all four explorers. Built-in image generation produced four transparent `movement.png` sheets (64 complete action drawings), with exact prompts beside them. Runtime now uses those sheets for fall, double jump, float and cling; the approved ground art and retained jump/grapple/dash art remain. All **14 pre-existing PNGs** match their pre-task SHA-256 hashes. No movement physics, camera, terrain, dependencies or Git history were changed.
+
+Fall capes stream upward, double-jump cloaks unfurl into leaf wings, float canopies are larger, and wall-cling faces away while the rear hand reaches back. Cling mirrors correctly for either wall and outgoing layers retain orientation during wall jumps. Shell span stays at 20 world units for every action, independent of cape bounds; the approved idle body supplies a stable vertical anchor. Blended heads share a horizontal anchor rather than appearing at separate positions. Guardian antennae are excluded from face measurements, and raised-hand wall contacts exclude low cape tips.
+
+Idle remains 3 fps; movement remains 8 fps. Movement now interpolates throughout each 125-ms frame interval, with 120-ms action transitions. Fall/cling reverse through their drawings to avoid a last-to-first snap. Double jump unfurls once, then alternates open wing poses while rising. This is whole-image crossfading, not geometric morphing. Complete pose changes still change limb/cape silhouettes; fingers can shift slightly around wall contact during blends.
+
+Confirmed under bundled Node **24.19.0**:
+
+- Regression checks against the pre-change animation module failed on body-anchor/size changes, missing wall-facing behavior and delayed movement blending. Updated animation checks pass, including both wall sides, interrupted transitions and open-wing playback.
+- `npm test`: **46 passed, 0 failed**, including physics, connected routes, real multiplayer/server validation, inventory hashes and sprite metadata.
+- `npm run build`: **passed**.
+- `npm run test:browser`: **passed**, including live character selection, Q dash/i-frames, repeated wall dashes, wall jump/double jump, float, multiplayer, reconnect, fullscreen, camera framing and touch controls; no page errors or missing assets.
+- `npm run test:sprites` (same script as the direct `node tests/sprite-browser.mjs` validation): **passed**. The isolated Vite/Chrome audit rendered revised poses for all characters and both walls, checked 20 opaque face samples (alpha ≥250) and 16 drawn attachment samples (alpha ≥160), and recorded a 7.2-second real-renderer replay.
+- Visually reviewed `test-results/action-sprite-audit.png` after correcting shell/contact measurements. Motion replay: `test-results/action-animation-preview.webm`. The initial audit could not connect because its URL used IPv4 while the default listener did not; explicit `127.0.0.1` binding resolved that harness failure.
+
+Reproduce from the root with `npm test`, `npm run build`, `npm run test:browser` and `npm run test:sprites`. Asset measurement: `python3 -B scripts/inspect-sprites.py --groups movement` (Pillow required); inventory refresh: `node scripts/update-asset-manifest.mjs`. Preview outputs are ignored QA files. Existing development listeners were left running. No subagents or commits.
+
+---
+
+## Historical: dash duration shortened by 50%
 
 Changed horizontal/upward dash duration from **0.18 to 0.09 seconds**. Speed remains 900 world units/second and cooldown remains 0.8 seconds. Invulnerability follows the shorter active dash window; cancellation and repeated wall-dash rules remain intact. The fixed 60 Hz simulation expires the nominal timer on the next tick.
 

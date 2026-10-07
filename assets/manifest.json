@@ -20,7 +20,7 @@
       "path": "README.md",
       "category": "documentation",
       "runtime": false,
-      "sha256": "ece933c0e06574029107c2b16c5f365939b7f17a8ac313cb908cd9b177672293"
+      "sha256": "41b8f97b854b95a1453ae5a63a1e4e7f6dee3c595279c91195be4933642e0aea"
     },
     {
       "path": "generated/characters/README.md",
@@ -44,7 +44,7 @@
       "path": "generated/sanctuary/README.md",
       "category": "documentation",
       "runtime": false,
-      "sha256": "9fa69b61804e3e536235297d4b4da2b3cb8acd00fb277cc67f31ccbe17fbcf90"
+      "sha256": "48bd83ad1c5ea511268f2e1322c0129e4b0771331c3e58f26302e8fa2aac4af5"
     },
     {
       "path": "generated/sanctuary/backgrounds/cavern.png",
@@ -75,6 +75,18 @@
       "category": "characters",
       "runtime": true,
       "sha256": "a77daa3d348b7a37f16272f6d7c6e097b9e0eaa853e5298d61ba892db83fcb00"
+    },
+    {
+      "path": "generated/sanctuary/characters/ant/movement.md",
+      "category": "documentation",
+      "runtime": false,
+      "sha256": "89e271e798d0cf9d71272a2da0afb298ac377439cef8a6fc79977198abf165cc"
+    },
+    {
+      "path": "generated/sanctuary/characters/ant/movement.png",
+      "category": "characters",
+      "runtime": true,
+      "sha256": "67e87e2d8558c146a223c9e15423b5d7cef44cdc04bec8ad16021caf8c093efc"
     },
     {
       "path": "generated/sanctuary/characters/ant/special.md",
@@ -113,6 +125,18 @@
       "sha256": "1ae197927490be929c11369a509be82f3895530939178fa3738296fc0f44a1dd"
     },
     {
+      "path": "generated/sanctuary/characters/beetle/movement.md",
+      "category": "documentation",
+      "runtime": false,
+      "sha256": "2f0425c4ac53a993cb741e373bd10acf52ec015c500f1b3a234a978914d2c1aa"
+    },
+    {
+      "path": "generated/sanctuary/characters/beetle/movement.png",
+      "category": "characters",
+      "runtime": true,
+      "sha256": "8778ca2530b6506e37d754157f5638a0e023397670387c839ef12e4c40f4d3a6"
+    },
+    {
       "path": "generated/sanctuary/characters/beetle/special.md",
       "category": "documentation",
       "runtime": false,
@@ -147,6 +171,18 @@
       "category": "characters",
       "runtime": true,
       "sha256": "1d5dc2515d6b48e8561fe5d97564d3c8333096bcf581ee6078cec088535eef41"
+    },
+    {
+      "path": "generated/sanctuary/characters/moth/movement.md",
+      "category": "documentation",
+      "runtime": false,
+      "sha256": "62f628b79a373391cf877e455d6a18b8d47893010a594c8b70f4ddc566ceccf2"
+    },
+    {
+      "path": "generated/sanctuary/characters/moth/movement.png",
+      "category": "characters",
+      "runtime": true,
+      "sha256": "21fba73154e1c9aa998a489b9269d363d2b42eb2663dfbb5e99538ddd3877600"
     },
     {
       "path": "generated/sanctuary/characters/moth/special.md",
@@ -185,6 +221,18 @@
       "sha256": "93e0cce792c82b0016b307f15ddad0607b3871a4ffb755e0cc4aad564ffbf05a"
     },
     {
+      "path": "generated/sanctuary/characters/pillbug/movement.md",
+      "category": "documentation",
+      "runtime": false,
+      "sha256": "73ab211e2f96e9551d4b9130db946be94412a49d5bad5ed429ef752873591973"
+    },
+    {
+      "path": "generated/sanctuary/characters/pillbug/movement.png",
+      "category": "characters",
+      "runtime": true,
+      "sha256": "fc2a988537ade114aac64755634b3fc171d33051abdc6c497a8090fcb61a7933"
+    },
+    {
       "path": "generated/sanctuary/characters/pillbug/special.md",
       "category": "documentation",
       "runtime": false,
@@ -200,7 +248,7 @@
       "path": "generated/sanctuary/manifest.json",
       "category": "metadata",
       "runtime": false,
-      "sha256": "12b6529458bf0c9fd92787706ac6775605c5ba7084db16988737d10210974424"
+      "sha256": "09b1b64d8757866d0775df480256fcb4842bd5ad7e60342d0352b0a7d189e8d8"
     },
     {
       "path": "kenney-new-platformer/audio/sfx_jump.ogg",

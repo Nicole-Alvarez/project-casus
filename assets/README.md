@@ -14,7 +14,7 @@ The retained library contains four smooth chibi insect explorers, their approved
 | `kenney-new-platformer/licenses/` | Original CC0 license |
 | `manifest.json` | Complete retained file inventory, runtime flags and SHA-256 hashes |
 
-Each character has `ground.png` (idle/run), `air.png` (jump/fall/double jump/grapple) and `special.png` (float/cling/dash/upward wall dash), with four full drawings per action. Exact prompts accompany each PNG as `.md` files. See [runtime artwork](generated/sanctuary/README.md).
+Each character has `ground.png` (idle/run), `air.png` (retained jump/grapple), `special.png` (retained dash/upward wall dash), and `movement.png` (revised fall/double jump/float/cling), with four complete drawings stored per action. Idle uses only its first drawing to prevent inconsistent sword/leg geometry from cycling. A local whole-texture deformation supplies slow cape waves and chest breathing while protecting helmet, sword, hands and feet; source PNGs remain unchanged. The old air/special rows are retained inside sheets that still provide other runtime actions. Exact prompts accompany each PNG as `.md` files. See [runtime artwork](generated/sanctuary/README.md).
 
 Generated art uses the built-in image-generation tool and is not assigned a third-party CC0 license. Hollow Knight and Silksong are visual inspirations; no official game assets are included. Sound comes from [Kenney's New Platformer Pack](https://kenney.nl/assets/new-platformer-pack); the retained original license states CC0.
 

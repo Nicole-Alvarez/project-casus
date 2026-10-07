@@ -8,13 +8,15 @@ from collections import deque
 from pathlib import Path
 import json
 import math
+import argparse
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / 'assets/generated/sanctuary/characters'
 GROUPS = {'ground': ['idle', 'run'],
           'air': ['jump', 'fall', 'doubleJump', 'grapple'],
-          'special': ['float', 'cling', 'dash', 'wallDash']}
+          'special': ['float', 'cling', 'dash', 'wallDash'],
+          'movement': ['fall', 'doubleJump', 'float', 'cling']}
 
 def components(width, height, predicate):
     seen = bytearray(width * height)
@@ -90,8 +92,8 @@ def inspect(skin, group):
                     and abs((box[1]+box[3]-main[1]-main[3])/2) < (main[3]-main[1])*.4)
                 if face_fragment and overlap >= min(main[3]-main[1], box[3]-box[1])*.5 and abs((box[0]+box[2]-main[0]-main[2])/2) < (main[3]-main[1])*.95:
                     head = [min(head[0],box[0]),min(head[1],box[1]),max(head[2],box[2]),max(head[3],box[3])]
-            if skin == 'moth':
-                # Feather stalks sometimes touch the face's fill. Erode only
+            if skin == 'moth' or (skin == 'pillbug' and group == 'movement'):
+                # Feather stalks/short antennae can touch the face's fill. Erode only
                 # the inspection mask to separate those thin connections;
                 # the original full drawing is never edited.
                 radius = 5
@@ -103,7 +105,7 @@ def inspect(skin, group):
                                        (-radius,-radius),(radius,-radius),(-radius,radius),(radius,radius)])
                 cores = components(right-left, bottom-top, face_core)
                 if not cores:
-                    raise ValueError('No moth face core')
+                    raise ValueError(f'{skin}/{state}: no face core')
                 core = bounds(max(cores, key=len))
                 main_core = core[:]
                 for fragment in cores:
@@ -131,17 +133,33 @@ def inspect(skin, group):
                            'pivotX': round(hx-sx, 2), 'pivotY': foot_y-sy,
                            'scale': round(scale, 8), 'shellHeight': head_height, 'shellSpan': round(head_span, 8),
                            'shellCenterY': round(hy-sy, 2)})
+            if state == 'cling' and group == 'movement':
+                # The raised rear hand sits beside the face. Ignore cape tips
+                # and low sword/boot pixels when finding the wall contact.
+                hand = [(x, y) for x, y in points if x > hx+head_height*.5
+                        and hy-head_height*.7 <= y <= hy+head_height*.15]
+                if not hand:
+                    raise ValueError(f'{skin}/{state}: no raised wall hand')
+                frames[-1]['wallAttachX'] = max(x for x, y in hand)-sx
         clips[state] = {'fps': 8, 'loop': state in ['idle','run','fall','doubleJump','float','cling','grapple'],
                         'frames': frames}
+        if group == 'movement':
+            if state == 'doubleJump':
+                clips[state].update(sequence=[0, 1, 2, 3], loopFrom=2)
+            elif state in ['fall', 'cling']:
+                clips[state].update(sequence=[0, 1, 2, 3, 2, 1], loopFrom=0)
     return clips
 
 if __name__ == '__main__':
-    atlas = {}
-    for skin in ['beetle','moth','ant','pillbug']:
-        atlas[skin] = {}
-        for group in GROUPS:
-            atlas[skin].update(inspect(skin, group))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--groups', nargs='+', choices=list(GROUPS), default=list(GROUPS))
+    args = parser.parse_args()
     destination = ROOT / 'frontend/src/sprite-frames.mjs'
+    atlas = json.loads(destination.read_text().split('export const SPRITE_FRAMES=')[1].rstrip(';\n')) if destination.exists() else {}
+    for skin in ['beetle','moth','ant','pillbug']:
+        atlas.setdefault(skin, {})
+        for group in args.groups:
+            atlas[skin].update(inspect(skin, group))
     destination.write_text('// Measured by scripts/inspect-sprites.py; source PNGs are unchanged.\n'
                            + 'export const SPRITE_FRAMES=' + json.dumps(atlas, separators=(',', ':')) + ';\n')
-    print('Measured 160 complete poses across 12 source sheets; all clips play at 8 fps.')
+    print('Measured '+', '.join(args.groups)+'; retained 160 complete runtime poses at 8 fps.')
