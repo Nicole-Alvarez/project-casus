@@ -1,0 +1,99 @@
+{
+  "generatedAt": "2026-10-07",
+  "tool": "built-in image-generation",
+  "characterReference": "../characters/replacement-concepts/bug-knights-v1.png",
+  "animationFps": 8,
+  "files": [
+    {
+      "path": "backgrounds/cavern.png",
+      "sha256": "2ab0f21f52646b56af04fbbd402abb0481a905c1db0a5b4a87471a37ef89df71",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGB"
+    },
+    {
+      "path": "characters/ant/air.png",
+      "sha256": "9465cf73a24b08e788c2d5d232794ae543f9469a308137d60832fa235f6153d3",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/ant/ground.png",
+      "sha256": "a77daa3d348b7a37f16272f6d7c6e097b9e0eaa853e5298d61ba892db83fcb00",
+      "width": 1568,
+      "height": 1003,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/ant/special.png",
+      "sha256": "4d1de80e12026e168081fa7b6f0d61d6fbeb47edd3f21dbcc699e47d689e2dec",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/beetle/air.png",
+      "sha256": "726383a6eee4664d6b8f4f98bb27bfa51f8cc45c28ceb0186bb147b135e613fc",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/beetle/ground.png",
+      "sha256": "1ae197927490be929c11369a509be82f3895530939178fa3738296fc0f44a1dd",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/beetle/special.png",
+      "sha256": "7b11bc75f076fb76fb6467b850a95fb9517a1c19c5bad44b1f0fe042a7bee397",
+      "width": 1261,
+      "height": 1247,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/moth/air.png",
+      "sha256": "df0d15b96046b6fd39a4050de2a098d78775318c490f525c519533e5b9c1d9dc",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/moth/ground.png",
+      "sha256": "1d5dc2515d6b48e8561fe5d97564d3c8333096bcf581ee6078cec088535eef41",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/moth/special.png",
+      "sha256": "4e74d3d70fb67702927b4ca1ec0f58e1f6a1a352f99977e64e8c9124fd83dbd2",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/pillbug/air.png",
+      "sha256": "b36f1c18fbf3d6464358d234e384c6ea79e83a824d788dabb8be23ac803e52c1",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/pillbug/ground.png",
+      "sha256": "93e0cce792c82b0016b307f15ddad0607b3871a4ffb755e0cc4aad564ffbf05a",
+      "width": 1536,
+      "height": 1024,
+      "mode": "RGBA"
+    },
+    {
+      "path": "characters/pillbug/special.png",
+      "sha256": "6b6b2d5d8c7d76a7d87fd4ba1f787800f0007ad6743c8f86046592039d47196e",
+      "width": 1254,
+      "height": 1254,
+      "mode": "RGBA"
+    }
+  ]
+}

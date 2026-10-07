@@ -1,16 +1,23 @@
-# Downloaded free assets
+# Game assets
 
-Art: [Kenney Pixel Platformer](https://kenney.nl/assets/pixel-platformer), version 1.2 as stated in the bundled license. Sound: [Kenney New Platformer Pack](https://kenney.nl/assets/new-platformer-pack), download 1.1. Both packs are **CC0**; the original license files are in each pack's `licenses/` folder.
+The retained library contains four smooth chibi insect explorers, their approved concept reference, the cavern background, two Kenney sound effects and provenance. All runtime assets are local.
 
-- `downloads/`: the unmodified official ZIP files, including the full supplemental art pack for future use.
-- `kenney-pixel-platformer/characters/`: characters and animation frames.
-- `kenney-pixel-platformer/terrain/`: grass, soil, stone, wood, and other platform tiles.
-- `kenney-pixel-platformer/props/`: plants, trees, flags, signs, decorations, and unused environment objects.
-- `kenney-pixel-platformer/items/`: coins, hearts, keys, and pickups.
-- `kenney-pixel-platformer/backgrounds/`: background tiles and clouds.
-- `kenney-pixel-platformer/ui/`: pixel numbers and symbols.
-- `kenney-pixel-platformer/spritesheets/`: original packed and spaced PNG sheets.
-- `kenney-new-platformer/audio/`: ten original OGG sound effects.
-- `manifest.json`: exact original-to-categorized file mapping, source URLs, and archive SHA-256 hashes.
+| Folder | Contents |
+| --- | --- |
+| `generated/sanctuary/characters/beetle/` | Lantern beetle: whole-character sheets and exact prompts |
+| `generated/sanctuary/characters/moth/` | Crescent moth: whole-character sheets and exact prompts |
+| `generated/sanctuary/characters/ant/` | Thorn ant: whole-character sheets and exact prompts |
+| `generated/sanctuary/characters/pillbug/` | Pebble guardian: whole-character sheets and exact prompts |
+| `generated/sanctuary/backgrounds/` | Cavern background |
+| `generated/characters/replacement-concepts/` | Approved four-character reference and its prompt |
+| `kenney-new-platformer/audio/` | Original `sfx_jump.ogg` and `sfx_magic.ogg` |
+| `kenney-new-platformer/licenses/` | Original CC0 license |
+| `manifest.json` | Complete retained file inventory, runtime flags and SHA-256 hashes |
 
-Descriptive filenames keep the original four-digit tile ID. Reproduce the library with `python3 scripts/organize-assets.py` after downloading the archives. Runtime files are served by Vite from this directory; production builds copy runtime categories to `frontend/dist/game-assets/`. Archives are not shipped in the browser build.
+Each character has `ground.png` (idle/run), `air.png` (jump/fall/double jump/grapple) and `special.png` (float/cling/dash/upward wall dash), with four full drawings per action. Exact prompts accompany each PNG as `.md` files. See [runtime artwork](generated/sanctuary/README.md).
+
+Generated art uses the built-in image-generation tool and is not assigned a third-party CC0 license. Hollow Knight and Silksong are visual inspirations; no official game assets are included. Sound comes from [Kenney's New Platformer Pack](https://kenney.nl/assets/new-platformer-pack); the retained original license states CC0.
+
+Obsolete concept iterations, the separate-body-parts rig, prior sheets, unused downloaded packs, archives and unused sounds have been removed. The production build includes only runtime files and the sound license; the approved reference and prompts remain in the source library.
+
+`python3 scripts/inspect-sprites.py` (requires Pillow) measures source poses and writes `frontend/src/sprite-frames.mjs`, without changing any image. Inspect new sheets visually before accepting measurements. `node scripts/update-asset-manifest.mjs` refreshes the retained inventory and hashes. `npm test` validates inventory, source rectangles and playback timing.

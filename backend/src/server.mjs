@@ -79,11 +79,13 @@ export async function createGameServer({ port = 3001, host = '0.0.0.0', allowedO
         let slot = 0; while (slots.has(slot)) slot++;
         room = target;
         rooms.set(room.code, room);
-        room.players.set(id, createPlayer(id, message.name, slot));
+        room.players.set(id, createPlayer(id, message.name, slot,message.sprite));
         room.inputs.set(id, NEUTRAL);
         ws.room = room; ws.playerId = id;
         clearTimeout(timeout);
         send(ws, { ...roomSnapshot(room), type:'welcome', id, room:room.code });
+      } else if(room&&message.type==='appearance'){
+        room.players.get(id).sprite=message.sprite;
       } else if (room) {
         room.inputs.set(id, message); lastInput = Date.now();
       } else fail('Join a room first.');

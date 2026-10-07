@@ -1,65 +1,49 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#111c24" />
-    <meta name="description" content="Mosslight — a little cooperative pixel-art adventure. Explore a moonlit grove together." />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23152129'/%3E%3Cpath d='M16 4l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' fill='%23b3edbe'/%3E%3C/svg%3E" />
-    <title>Mosslight — wander together</title>
-  </head>
-  <body>
-    <div class="app-shell">
-      <header class="site-header">
-        <a class="brand" href="/" aria-label="Mosslight home"><span class="brand-mark">✦</span> mosslight<span class="brand-dot">.</span></a>
-        <span class="header-note">a little adventure, together</span>
-        <button class="quiet-button" id="credits-open">About & assets <span>↗</span></button>
-      </header>
-
-      <main>
-        <div class="chapter-heading"><div><span class="eyebrow">A COOPERATIVE PLATFORMER</span><h1>The Moonlit Grove<span> / 01</span></h1></div><span class="chapter-tag"><span class="status-dot"></span> UP TO 8 EXPLORERS</span></div>
-        <section class="game-stage" aria-label="Cooperative platformer">
-          <canvas id="game" tabindex="0" aria-label="Moonlit grove game. Arrow keys or A and D to move; space to jump."></canvas>
-          <div class="stage-vignette"></div>
-          <div class="game-hud" id="game-hud" hidden>
-            <div class="hud-pill"><span class="status-dot" id="network-dot"></span><span id="network-status">Connecting</span><span class="hud-divider"></span><span id="player-count">0/8 explorers</span></div>
-            <div class="hud-pill coin-pill"><img src="/game-assets/kenney-pixel-platformer/items/coin_0151.png" alt="" /><strong id="coin-count">0</strong><span id="coin-total">/ 34</span></div>
-          </div>
-
-          <form id="join-form" class="join-card">
-            <div class="card-topline"><span class="tiny-spark">✦</span><span>THE TRAIL IS CALLING</span></div>
-            <h2>A little adventure.<br /><em>Better together.</em></h2>
-            <p>Leap through the grove, gather golden coins, and find your way home. Bring a friend or wander on your own.</p>
-            <label for="player-name">YOUR EXPLORER NAME</label>
-            <input id="player-name" name="name" maxlength="18" value="Explorer" autocomplete="nickname" required />
-            <label for="room-code">EXPEDITION CODE <span>Share this to play together</span></label>
-            <div class="room-field"><input id="room-code" name="room" minlength="3" maxlength="12" pattern="[A-Za-z0-9]{3,12}" required /><button type="button" id="new-room" aria-label="Generate a new expedition code" title="New expedition code">↻</button></div>
-            <button class="primary-button" id="join-button" type="submit">Start exploring <span>→</span></button>
-            <p id="join-error" class="error-message" role="alert" hidden></p>
-            <div class="join-footnote"><span class="status-dot"></span> Free to play · No account needed</div>
-          </form>
-
-          <div class="preview-caption" id="preview-caption"><span>✦</span> A new path awaits.<small>THE MOONLIT GROVE</small></div>
-          <div class="stage-bottom" id="stage-bottom" hidden>
-            <div class="roster" id="roster" aria-label="Players in your expedition"></div>
-            <div class="room-actions"><button id="invite-button" class="hud-button">Invite a friend ↗</button><button id="leave-button" class="hud-button muted">Leave</button></div>
-          </div>
-          <div class="touch-controls" id="touch-controls" hidden><div><button data-control="left" aria-label="Move left">←</button><button data-control="right" aria-label="Move right">→</button></div><button data-control="jump" class="jump-touch" aria-label="Jump">↑</button></div>
-          <div id="completion" class="completion-card" hidden><span class="tiny-spark">✦</span><span class="eyebrow">YOU FOUND YOUR WAY</span><h2>Home, together.</h2><p>The grove is a little brighter because of you.</p><p id="completion-score"></p><button id="continue-button" class="primary-button">Keep wandering <span>→</span></button></div>
-          <div id="toast" class="toast" role="status" hidden></div>
-        </section>
-        <div class="under-stage"><div class="level-label"><span class="status-dot"></span><span>Moonlit Grove</span><span class="subtle">a shared little world</span></div><div class="progress-track" aria-label="Level progress"><span id="level-progress"></span></div><span class="progress-caption" id="progress-caption">THE ADVENTURE STARTS HERE</span></div>
-
-        <section class="trail-guide" aria-label="How to play">
-          <div class="guide-intro"><span class="eyebrow">A FEW TRAIL NOTES</span><h2>Find your footing.</h2><p>No rush. The journey is the good part.</p></div>
-          <div class="guide-item"><span class="guide-number">01</span><h3>A small step, a big leap</h3><p><kbd>A</kbd> <kbd>D</kbd> or <kbd>←</kbd> <kbd>→</kbd> to move<br /><kbd>SPACE</kbd> or <kbd>W</kbd> to jump</p></div>
-          <div class="guide-item"><span class="guide-number">02</span><h3>Leave a little light</h3><p>Gather coins as a team. Reach the flag to finish. Press <kbd>R</kbd> to return to your checkpoint.</p></div>
-          <div class="guide-item"><span class="guide-number">03</span><h3>Bring your people</h3><p>Share your expedition link. Friends join the same grove, with room for eight.</p></div>
-        </section>
-      </main>
-      <footer><span>Made for the joy of wandering.</span><span>Art & sound by <a href="https://kenney.nl" target="_blank" rel="noreferrer">Kenney</a> <span class="footer-star">✦</span> CC0 assets</span></footer>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#081b22" />
+  <meta name="description" content="Explore Hollowroot Sanctuary together: a quiet cavern made for double jumps, wall climbs, floating and silk grapples." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23794d60'/%3E%3Cpath d='M16 10a2 2 0 1 0 0 .1M10 16a2 2 0 1 0 0 .1M22 16a2 2 0 1 0 0 .1M16 22a2 2 0 1 0 0 .1' stroke='%23101d24' stroke-width='3'/%3E%3C/svg%3E" />
+  <title>Mosslight — Hollowroot Sanctuary</title>
+</head>
+<body>
+  <main class="world" aria-label="Cooperative cavern exploration game">
+    <canvas id="game" tabindex="0" aria-label="Hollowroot Sanctuary. A/D to move, Space to double jump, Shift to float, E to grapple, Q to dash. Hold toward a wall to cling, jump away, or dash upward. R to return to rest."></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand"><span aria-hidden="true">✦</span> mosslight<small>HOLLOWROOT SANCTUARY</small></div>
+      <nav aria-label="Game options"><button id="help-open" aria-label="Open movement guide">?</button><button id="fullscreen-button" aria-label="Toggle browser fullscreen">⛶</button><button id="settings-open" aria-label="Open expedition settings">☰</button></nav>
+    </header>
+    <form id="join-form" class="join-card">
+      <span class="eyebrow">A QUIET PLACE, TOGETHER</span>
+      <h1>Into the<br /><em>hollow.</em></h1>
+      <p>Climb the old roots. Follow the silk.<br />There is no hurry here.</p>
+      <label for="player-name">YOUR NAME</label>
+      <input id="player-name" name="name" maxlength="18" autocomplete="nickname" value="Explorer" required />
+      <label for="character-select">YOUR EXPLORER</label>
+      <select id="character-select" name="character" aria-describedby="character-note"></select>
+      <small id="character-note" class="character-note">Choose your shell. Every explorer has the same moves.</small>
+      <label for="room-code">EXPEDITION <span>Share a code to meet</span></label>
+      <div class="room-field"><input id="room-code" name="room" minlength="3" maxlength="12" pattern="[A-Za-z0-9]{3,12}" required /><button type="button" id="new-room" aria-label="Generate a new room code">↻</button></div>
+      <button id="join-button" class="primary-button" type="submit">Enter the sanctuary <span>→</span></button>
+      <p id="join-error" class="error-message" role="alert" hidden></p>
+      <small class="join-footnote">1–8 explorers · All movement unlocked</small>
+    </form>
+    <div id="preview-caption" class="preview-caption">A little light, below the roots.</div>
+    <div id="game-hud" hidden>
+      <div class="presence"><span class="status-dot" id="network-dot"></span><span id="network-status">Connecting</span><span id="player-count">0/8 explorers</span></div>
+      <div class="rest"><span id="rest-name">The threshold</span><kbd>R</kbd><small>return</small></div>
+      <div class="abilities" aria-label="Traversal availability"><span id="jump-state"></span><span id="float-state"></span><span id="cling-state"></span><span id="grapple-state"></span><span id="dash-state"></span></div>
     </div>
-    <dialog id="credits-dialog"><button id="credits-close" class="dialog-close" aria-label="Close">×</button><span class="eyebrow">MADE WITH FREE ASSETS</span><h2>A shared little world.</h2><p>Mosslight is a cooperative browser platformer for up to eight explorers per room. Your server keeps everyone in the same world.</p><h3>Art & sound</h3><p><a href="https://kenney.nl/assets/pixel-platformer" target="_blank" rel="noreferrer">Kenney Pixel Platformer</a> supplies the pixel art. <a href="https://kenney.nl/assets/new-platformer-pack" target="_blank" rel="noreferrer">Kenney New Platformer Pack</a> supplies sound effects. Both are CC0.</p><p>Downloaded originals, categorized files, original licenses, and a source manifest are included in the project's assets folder.</p><h3>Controls</h3><p>A / D or ← / → to walk. Space / W / ↑ to jump. R to respawn. Touch controls appear on touch devices.</p></dialog>
-    <script type="module" src="/src/main.mjs"></script>
-  </body>
+    <div id="stage-bottom" hidden><div class="roster" id="roster" aria-label="Players in your expedition"></div></div>
+    <div id="touch-controls" class="touch-controls" hidden aria-label="Touch movement controls"><div class="touch-walk"><button data-control="left" aria-label="Move left">←</button><button data-control="right" aria-label="Move right">→</button></div><div class="touch-abilities"><button data-control="float">Float</button><button data-control="grapple">Silk</button><button data-control="dash">Dash</button><button data-control="jump" class="touch-jump">Jump ↑</button></div></div>
+    <div id="toast" class="toast" role="status" hidden></div>
+  </main>
+  <dialog id="settings-dialog"><button id="settings-close" class="dialog-close" aria-label="Close settings">×</button><span class="eyebrow">YOUR EXPEDITION</span><h2>A shared lantern.</h2><p>Invite a friend into your expedition, change your explorer or sound, or return to the entrance screen.</p><label class="character-label" for="character-setting">Your explorer</label><select id="character-setting" aria-describedby="character-setting-note"></select><small id="character-setting-note" class="character-note">Your friends see your choice. Changing it keeps your progress.</small><div class="room-actions"><button id="invite-button">Copy invite link ↗</button><button id="sound-button" aria-pressed="false">Sound off</button><button id="credits-open">Artwork & credits</button><button id="leave-button">Leave expedition</button></div></dialog>
+  <dialog id="help-dialog"><button id="help-close" class="dialog-close" aria-label="Close movement guide">×</button><span class="eyebrow">MOVEMENT GUIDE</span><h2>Find a way upward.</h2><p>Explore freely. Glowing lanterns set the resting place where <kbd>R</kbd> returns you. No collection or finish goals.</p><dl class="controls"><dt>A / D · ← / →</dt><dd>Walk and steer in the air.</dd><dt>Space / W / ↑</dt><dd>Jump, then release and press again for an air jump. The gallery steps need both.</dd><dt>Hold Shift</dt><dd>Float beneath your balloon cape while falling. Drift from the gallery to the small ledge across the hollow.</dd><dt>Hold toward a wall</dt><dd>Cling while descending. Jump launches away and restores one double jump and air dash. Hold toward the wall and press Q to dash upward. Release and press Q again after cooldown to keep climbing. Release the wall to fall.</dd><dt>Hold E</dt><dd>Pull toward the highlighted silk anchor. Release and press again to chain anchors. Jump cancels the tether.</dd><dt>Press Q</dt><dd>Dash horizontally, or upward when holding into a wall. Invulnerable for the active 0.09-second dash; one open-air dash before landing or wall jumping and a 0.8-second cooldown. Wall dashes can repeat while holding against a wall; release and press Q again after cooldown. Dash restores one air jump, usable during the dash. Jump or collision ends it.</dd><dt>R</dt><dd>Return to your last lantern.</dd></dl><p class="route-note">Gallery → silk ascent → quiet sanctuary. Jump and dash across the broken bridge, or climb the shaft. On the right return ledge, step left to descend to the lower corridor.</p><small>Your sword is cosmetic. This map is for exploring and testing movement. Opening menus pauses your controls while friends continue.</small></dialog>
+  <dialog id="credits-dialog"><button id="credits-close" class="dialog-close" aria-label="Close credits">×</button><span class="eyebrow">ARTWORK & SOUND</span><h2>Below the roots.</h2><p>The four insect explorers, whole-character movement sheets and cavern background were generated for this project from the approved character concepts. Smooth terrain, arches, roots and lanterns are drawn in Canvas.</p><p>Sound effects: <a href="https://kenney.nl/assets/new-platformer-pack" target="_blank" rel="noreferrer">Kenney New Platformer Pack</a>, CC0.</p><p>Generated source images, prompts, frame metadata and hashes are included in the assets folder. Hollow Knight and Silksong are visual inspirations; this project is unaffiliated.</p><p>There are no enemies or damage hazards. Dash invulnerability remains part of the shared multiplayer simulation.</p></dialog>
+  <script type="module" src="/src/main.mjs"></script>
+</body>
 </html>

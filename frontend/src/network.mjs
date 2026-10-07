@@ -5,12 +5,12 @@ export class Connection {
   ready = false;
   timer = null;
   constructor({ onMessage, onStatus, onError }) { Object.assign(this,{ onMessage,onStatus,onError }); }
-  join(room, name) { this.disconnect(); this.room = room; this.name = name; this.stopped = false; this.retries = 0; this.open(); }
+  join(room, name, sprite) { this.disconnect(); this.room = room; this.name = name; this.sprite=sprite; this.stopped = false; this.retries = 0; this.open(); }
   open() {
     this.onStatus(this.retries ? 'Reconnecting' : 'Connecting');
     const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
     this.socket = ws;
-    ws.addEventListener('open', () => ws.send(JSON.stringify({ type:'join', room:this.room, name:this.name })));
+    ws.addEventListener('open', () => ws.send(JSON.stringify({ type:'join', room:this.room, name:this.name,sprite:this.sprite })));
     ws.addEventListener('message', event => {
       if (this.socket !== ws) return;
       let message; try { message = JSON.parse(event.data); } catch { return; }
@@ -29,5 +29,6 @@ export class Connection {
     });
   }
   input(input) { if (this.ready && this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify({ type:'input', ...input })); }
+  appearance(sprite) { this.sprite=sprite;if(this.ready&&this.socket?.readyState===WebSocket.OPEN)this.socket.send(JSON.stringify({type:'appearance',sprite})); }
   disconnect() { this.stopped = true; this.ready = false; clearTimeout(this.timer); const ws = this.socket; this.socket = null; ws?.close(); }
 }

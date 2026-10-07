@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { WebSocket } from 'ws';
+import { NEUTRAL } from '../shared/physics.mjs';
 import { createGameServer } from '../backend/src/server.mjs';
 
-function connect(port, room = 'GROVE', name = 'Explorer') {
+function connect(port, room = 'GROVE', name = 'Explorer', sprite) {
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(`ws://127.0.0.1:${port}/ws`);
     const messages = [];
@@ -12,7 +13,7 @@ function connect(port, room = 'GROVE', name = 'Explorer') {
       const message = JSON.parse(raw); messages.push(message);
       if (message.type === 'welcome' || message.type === 'error') resolve({ ws, messages, welcome: message });
     });
-    ws.on('open', () => ws.send(JSON.stringify({ type:'join', room, name })));
+    ws.on('open', () => ws.send(JSON.stringify({ type:'join', room, name, ...(sprite?{sprite}:{}) })));
   });
 }
 const waitFor = async (predicate) => {
@@ -20,6 +21,24 @@ const waitFor = async (predicate) => {
   while (Date.now() < end) { if (predicate()) return; await new Promise(resolve => setTimeout(resolve, 20)); }
   throw new Error('Timed out waiting for server behavior');
 };
+
+test('peers observe sprite selection on join and live changes without resetting progress',async()=>{
+  const game=await createGameServer({port:0,host:'127.0.0.1'});
+  try{
+    const a=await connect(game.port,'LOOK','Moss','moth'),b=await connect(game.port,'LOOK','Fern','ant');
+    assert.equal(a.welcome.players.find(p=>p.id===a.welcome.id).sprite,'moth');
+    await waitFor(()=>b.messages.some(m=>m.type==='snapshot'&&m.players.find(p=>p.id===a.welcome.id)?.sprite==='moth'));
+    const p=game.rooms.get('LOOK').players.get(a.welcome.id);await waitFor(()=>p.grounded);
+    a.ws.send(JSON.stringify({type:'input',...NEUTRAL,right:true}));
+    await waitFor(()=>p.x>380);a.ws.send(JSON.stringify({type:'input',...NEUTRAL}));
+    await waitFor(()=>p.vx===0);const x=p.x,y=p.y;
+    a.ws.send(JSON.stringify({type:'appearance',sprite:'pillbug'}));
+    await waitFor(()=>b.messages.some(m=>m.type==='snapshot'&&m.players.find(p=>p.id===a.welcome.id)?.sprite==='pillbug'));
+    assert.equal(p.x,x);assert.equal(p.y,y);assert.equal(p.name,'Moss');
+    a.ws.send(JSON.stringify({type:'appearance',sprite:'unknown'}));
+    await waitFor(()=>a.messages.some(m=>m.type==='error'));assert.equal(p.sprite,'pillbug');
+  }finally{await game.close();}
+});
 
 test('real clients share movement, isolate rooms, reject position cheating, and clean up', async () => {
   const game = await createGameServer({ port: 0, host: '127.0.0.1' });
@@ -29,7 +48,7 @@ test('real clients share movement, isolate rooms, reject position cheating, and 
     const c = await connect(game.port, 'OTHER', 'Moon');
     await waitFor(() => b.messages.some(m => m.type === 'snapshot' && m.players.length === 2));
     const initial = b.messages.findLast(m => m.type === 'snapshot').players.find(p => p.id === a.welcome.id).x;
-    a.ws.send(JSON.stringify({ type:'input', left:false, right:true, jump:false, respawn:false }));
+    a.ws.send(JSON.stringify({ type:'input', ...NEUTRAL, right:true }));
     await waitFor(() => b.messages.some(m => m.type === 'snapshot' && m.players.find(p => p.id === a.welcome.id)?.x > initial + 25));
     assert.ok(c.messages.filter(m => m.type === 'snapshot').every(m => m.players.length === 1));
     a.ws.send(JSON.stringify({ type:'input', x:900000 }));
@@ -90,4 +109,21 @@ test('malformed and oversized messages close only the offending connection', asy
     assert.equal(valid.ws.readyState,WebSocket.OPEN);
     assert.equal((await fetch(`http://127.0.0.1:${game.port}/health`)).status,200);
   } finally { await game.close(); }
+});
+
+
+test('a second client observes authoritative dash i-frames and their expiry',async()=>{
+  const game=await createGameServer({port:0,host:'127.0.0.1'});
+  try {
+    const a=await connect(game.port,'MOVES','Moss'),b=await connect(game.port,'MOVES','Fern');
+    await waitFor(()=>game.rooms.get('MOVES').players.get(a.welcome.id).grounded);
+    a.ws.send(JSON.stringify({type:'input',...NEUTRAL,right:true,jump:true}));
+    await waitFor(()=>game.rooms.get('MOVES').players.get(a.welcome.id).vy<0);
+    a.ws.send(JSON.stringify({type:'input',...NEUTRAL,right:true,dash:true}));
+    await waitFor(()=>b.messages.some(m=>m.type==='snapshot'&&m.players.find(p=>p.id===a.welcome.id)?.invulnerable));
+    const active=b.messages.findLast(m=>m.type==='snapshot'&&m.players.find(p=>p.id===a.welcome.id)?.invulnerable).players.find(p=>p.id===a.welcome.id);
+    assert.ok(active.dashTime>0);assert.equal(active.airDashAvailable,false);
+    await waitFor(()=>!game.rooms.get('MOVES').players.get(a.welcome.id).invulnerable);
+    assert.ok(b.messages.filter(m=>m.type==='snapshot').every(m=>!('collected' in m)&&!('completed' in m)));
+  } finally {await game.close();}
 });

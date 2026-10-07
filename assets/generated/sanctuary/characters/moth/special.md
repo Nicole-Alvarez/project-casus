@@ -1,0 +1,14 @@
+# moth — special whole-character sheet
+
+Generated on 2026-10-07 with the built-in image-generation tool. The source PNG is copied unchanged. Reference: `../../../characters/replacement-concepts/bug-knights-v1.png` and this character's `ground.png`.
+
+Complete character drawings for playback at 8 fps; no separate body parts.
+
+Exact prompt:
+
+```text
+Use case: identity-preserve. Asset type: transparent WHOLE-CHARACTER 2D animation sprite sheet for 8-FPS gameplay. Reference image is a four-character concept sheet. Reproduce ONLY the specified character, not the other three. Preserve its face, shell shape, antennae, green fabric cloak, tiny dark insect body, bone sword, proportions and restrained hand-drawn color palette. Original Hollow Knight-inspired design. Each frame is a complete independently drawn full-body pose, never detached parts or a paper-doll rig. Smooth ink outlines, simple flat cel shading; no pixel art, glow, ground shadows, text, labels, cell borders or background. Genuinely transparent alpha, not a painted checkerboard.
+All frames face RIGHT in the SAME three-quarter side view. Strict equally spaced FOUR columns. Every entire character, sword and cloak stays inside its own cell with large transparent gutters. Keep identical head size, body size and limb lengths across all poses. Feet share a consistent baseline and body center inside each cell. Character should occupy at most 60% of cell height and 65% of cell width. Sword held low and close so it cannot overlap adjacent cells. Keep poses compact and readable. Do not scale up airborne poses.
+Character B, TOP RIGHT ONLY: crescent moth pilgrim, pale ivory teardrop shell face with two black oval eye holes, TWO soft feathery swept antennae, tiny dark oval body, sage-green flowing bell cloak, burgundy scarf, curved bone longsword. No wings separate from the cape. No other character.
+Exactly SIXTEEN complete poses in a square 4-column 4-row grid. Row 1: FOUR sequential FLOAT poses: green cloak is a SMALL rounded inflated balloon hood just behind/above the head, arms hold the hems, feet dangle. Subtle cloth and leg movement forming a loop. Same head/body size as all other rows. The balloon cape is only 1.4 times head width, top no more than half a head above antennae: compact, never a giant parachute. Row 2: FOUR sequential WALL CLING poses, free hand and near foot reaching toward an invisible wall on the right, side-lean and small cape movement. Row 3: FOUR sequential HORIZONTAL DASH right poses, low forward leaning body, legs/cape trail left. Row 4: FOUR sequential UPWARD WALL DASH poses, upright elongated jump posture, free hand reaches upward along an invisible wall on right, cape streams down. No walls, tethers, smoke or speed trails. Sixteen complete separate characters.
+```

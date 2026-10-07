@@ -1,12 +1,14 @@
 import { NEUTRAL } from '../../shared/physics.mjs';
 
-const KEYS = { KeyA:'left', ArrowLeft:'left', KeyD:'right', ArrowRight:'right', KeyW:'jump', ArrowUp:'jump', Space:'jump', KeyR:'respawn' };
+const KEYS = { KeyA:'left', ArrowLeft:'left', KeyD:'right', ArrowRight:'right', KeyW:'jump', ArrowUp:'jump', Space:'jump', KeyR:'respawn', ShiftLeft:'float', ShiftRight:'float', KeyE:'grapple', KeyQ:'dash' };
 export class Input {
   active = false;
   held = new Set();
   constructor(canvas) {
     window.addEventListener('keydown', event => {
       if (!this.active || /INPUT|TEXTAREA|BUTTON/.test(event.target.tagName) || document.querySelector('dialog[open]')) return;
+      // After blur/menu/reconnect, require a fresh press rather than a held-key repeat.
+      if (event.repeat && !this.held.has(event.code)) return;
       if (KEYS[event.code]) { event.preventDefault(); this.held.add(event.code); }
     });
     window.addEventListener('keyup', event => { this.held.delete(event.code); });
@@ -15,7 +17,7 @@ export class Input {
     canvas.addEventListener('pointerdown', () => canvas.focus({ preventScroll:true }));
     document.querySelectorAll('[data-control]').forEach(button => {
       const key = 'touch-'+button.dataset.control;
-      button.addEventListener('pointerdown', event => { if (!this.active) return; event.preventDefault(); button.setPointerCapture(event.pointerId); this.held.add(key); });
+      button.addEventListener('pointerdown', event => { if (!this.active) return; event.preventDefault(); button.setPointerCapture(event.pointerId); this.held.add(key); canvas.focus({preventScroll:true}); });
       for (const type of ['pointerup','pointercancel','lostpointercapture']) button.addEventListener(type, () => this.held.delete(key));
     });
   }
